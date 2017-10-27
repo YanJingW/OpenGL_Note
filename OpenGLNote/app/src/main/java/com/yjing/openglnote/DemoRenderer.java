@@ -179,9 +179,7 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         //开始绘制两个点，从第9个点开始取1个点
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1);
-
-
-
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1);
+        
     }
 }

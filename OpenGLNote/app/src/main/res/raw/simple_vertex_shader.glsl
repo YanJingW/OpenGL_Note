@@ -6,4 +6,5 @@ attribute vec4 a_Position;
 
 void main() {
     gl_Position = a_Position;
+    gl_PointSize = 10.0;//屏幕上所显示的点的大小，否则画点会出不来
 }
