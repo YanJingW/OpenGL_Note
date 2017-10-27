@@ -1,4 +1,4 @@
-package com.qihoo.ai.openglnote;
+package com.yjing.openglnote;
 
 import android.opengl.GLES20;
 import android.util.Log;

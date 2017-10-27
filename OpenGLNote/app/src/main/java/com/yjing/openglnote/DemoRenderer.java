@@ -4,7 +4,6 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import com.qihoo.ai.openglnote.GlUtil;
 import com.qihoo.ai.openglnote.R;
 
 import java.nio.ByteBuffer;
@@ -19,8 +18,18 @@ import javax.microedition.khronos.opengles.GL10;
  */
 
 class DemoRenderer implements GLSurfaceView.Renderer {
-    
+
+
     private static final int BYTES_PER_FLOAT = 4;
+
+    //和simple_fragment_shader.glsl中的uniform vec4 u_Color;是对应的
+    private static final String U_COLOR = "u_Color";
+    //和simple_vertex_shader.glsl中的attribute vec4 a_Position;是对应的
+    public static final String A_POSITION = "a_Position";
+    private static final int POSITION_COMPONENT_COUNT = 2;
+
+    private int uColorLocation;
+    private int aPositionLocation;
 
     private final FloatBuffer vertexData;
     private final Context context;
@@ -66,6 +75,7 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         //设置清空屏幕用的颜色
         GLES20.glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
+        //1.加载OpenGL程序及着色器代码
         //读取glsl字符串
         String vertexShaderStr = RawResourceReader.readTextFileFromRawResource(context, R.raw.simple_vertex_shader);
         String fragmentShaderStr = RawResourceReader.readTextFileFromRawResource(context, R.raw.simple_fragment_shader);
@@ -80,6 +90,20 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 
         //告诉openGL在绘制任何东西的时候要使用这里定义的程序
         GLES20.glUseProgram(program);
+
+        //获取uniform的位置, 并把这个位置存入uColorLocation
+        uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR);
+
+        //获取属性的位置,有了这个位置，就能告诉OpenGL去哪里找到这个属性对应的数据
+        aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
+
+        //2.读取顶点数据
+        vertexData.position(0);//确保从缓冲区的开头读取数据。每个缓冲区都有一个内部指针可以通过调用position()来移动它
+        //告诉openGL可以在缓冲区vertexData找到属性a_Position对应的数据。
+        //参数：1.属性位置；2.表示vertexData中几个分量表示一个点；3.表数据类型；6.表数据源
+        GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, 0, vertexData);
+        //使能顶点数组
+        GLES20.glEnableVertexAttribArray(aPositionLocation);
 
     }
 
