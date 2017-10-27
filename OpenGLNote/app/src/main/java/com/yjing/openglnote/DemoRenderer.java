@@ -41,15 +41,23 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         // TODO: 2017/10/26 使用一致的卷曲顺序，可以优化性能：
         // todo 使用卷曲顺序可以指出一个三角形属于任何给定物体的前面或者后面，OpenGL可以忽略那些无论如何都无法被看到的后面的三角形
         float[] tableVerticesWithTriangle = {
-                //三角形1
-                -0.5f,-0.5f,
-                0.5f,0.5f,
-                -0.5f,0.5f,
-
-                //三角形2
+//                //三角形1
+//                -0.5f,-0.5f,
+//                0.5f,0.5f,
+//                -0.5f,0.5f,
+//
+//                //三角形2
+//                -0.5f,-0.5f,
+//                0.5f,-0.5f,
+//                0.5f,0.5f,
+                //重新定义三角形的顶点
+                0,0,
                 -0.5f,-0.5f,
                 0.5f,-0.5f,
                 0.5f,0.5f,
+                -0.5f,0.5f,
+                -0.5f,-0.5f,
+
 
                 //线1
                 -0.5f,0f,
@@ -164,7 +172,7 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
         GlUtil.checkGlError("glUniform4f");
         //开始绘制三角形，从第0个点取6个点，共画两个三角形
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
         GlUtil.checkGlError("glDrawArrays");
 
         GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
@@ -180,6 +188,6 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         //开始绘制两个点，从第9个点开始取1个点
         GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1);
-        
+
     }
 }
