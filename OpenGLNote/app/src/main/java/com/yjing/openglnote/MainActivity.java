@@ -4,8 +4,6 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.qihoo.ai.openglnote.R;
-
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -24,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         glSurfaceView = new GLSurfaceView(this);
+
+        //必须要设置opengl版本
+        glSurfaceView.setEGLContextClientVersion(2);
 
         glSurfaceView.setRenderer(new DemoRenderer(this));
 

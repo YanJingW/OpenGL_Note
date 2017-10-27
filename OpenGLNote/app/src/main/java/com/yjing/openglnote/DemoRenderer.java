@@ -4,8 +4,6 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import com.qihoo.ai.openglnote.R;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -52,6 +50,14 @@ class DemoRenderer implements GLSurfaceView.Renderer {
                 0f,0f,
                 9f,0f,
                 9f,14f,
+
+                //线1
+                0f,7f,
+                9f,7f,
+
+                //木槌
+                4.5f,2f,
+                4.5f,12f
         };
 
 
@@ -73,7 +79,7 @@ class DemoRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         //设置清空屏幕用的颜色
-        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         //1.加载OpenGL程序及着色器代码
         //读取glsl字符串
@@ -87,23 +93,29 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         int program = GlUtil.linkProgram(vertexShader, fragmentShader);
 
         GlUtil.validateProgram(program);
+        GlUtil.checkGlError("validateProgram");
 
         //告诉openGL在绘制任何东西的时候要使用这里定义的程序
         GLES20.glUseProgram(program);
+        GlUtil.checkGlError("glUseProgram");
 
         //获取uniform的位置, 并把这个位置存入uColorLocation
         uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR);
+        GlUtil.checkGlError("glGetUniformLocation");
 
         //获取属性的位置,有了这个位置，就能告诉OpenGL去哪里找到这个属性对应的数据
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
+        GlUtil.checkGlError("glGetAttribLocation");
 
         //2.读取顶点数据
         vertexData.position(0);//确保从缓冲区的开头读取数据。每个缓冲区都有一个内部指针可以通过调用position()来移动它
         //告诉openGL可以在缓冲区vertexData找到属性a_Position对应的数据。
         //参数：1.属性位置；2.表示vertexData中几个分量表示一个点；3.表数据类型；6.表数据源
         GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, 0, vertexData);
+        GlUtil.checkGlError("glVertexAttribPointer");
         //使能顶点数组
         GLES20.glEnableVertexAttribArray(aPositionLocation);
+        GlUtil.checkGlError("glEnableVertexAttribArray");
 
     }
 
@@ -130,6 +142,31 @@ class DemoRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         //清空屏幕，擦除屏幕上的所有颜色，并用之前glClearColor()调用定义的颜色充满整个屏幕
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GlUtil.checkGlError("glClear");
+
+        //3.5在屏幕上绘制
+        //更新着色器代码中的u_Color的值。与属性不同，uniform的分量没有默认值
+        GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+        GlUtil.checkGlError("glUniform4f");
+        //开始绘制三角形，从第0个点取6个点，共画两个三角形
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+        GlUtil.checkGlError("glDrawArrays");
+
+        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        GlUtil.checkGlError("glUniform4f");
+        //开始绘制一条执行，从第0个点取2个点
+        GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
+        GlUtil.checkGlError("glDrawArrays");
+
+        GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
+        //开始绘制两个点，从第8个点开始取1个点
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1);
+
+        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        //开始绘制两个点，从第9个点开始取1个点
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1);
+
+
 
     }
 }
