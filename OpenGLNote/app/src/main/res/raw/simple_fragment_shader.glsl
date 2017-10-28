@@ -4,8 +4,8 @@
 precision mediump float;//定义了所有浮点数据类型的默认精度，可选lowp\mediump\highp
 
 //我们要使用这个uniform设置将要绘制的东西的颜色
-uniform vec4 u_Color;
+varying vec4 v_Color;
 
 void main() {
-    gl_FragColor = u_Color;
+    gl_FragColor = v_Color;
 }

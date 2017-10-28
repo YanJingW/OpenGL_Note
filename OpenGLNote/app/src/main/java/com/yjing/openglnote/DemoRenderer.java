@@ -21,12 +21,14 @@ class DemoRenderer implements GLSurfaceView.Renderer {
     private static final int BYTES_PER_FLOAT = 4;
 
     //和simple_fragment_shader.glsl中的uniform vec4 u_Color;是对应的
-    private static final String U_COLOR = "u_Color";
+    public static final String A_COLOR = "a_Color";
     //和simple_vertex_shader.glsl中的attribute vec4 a_Position;是对应的
     public static final String A_POSITION = "a_Position";
     private static final int POSITION_COMPONENT_COUNT = 2;
+    private static final int COLOR_COMPONENT_COUNT = 3;
+    public static final int STRIDE = (POSITION_COMPONENT_COUNT+COLOR_COMPONENT_COUNT)*BYTES_PER_FLOAT;
 
-    private int uColorLocation;
+    private int aColorLocation;
     private int aPositionLocation;
 
     private final FloatBuffer vertexData;
@@ -51,21 +53,21 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 //                0.5f,-0.5f,
 //                0.5f,0.5f,
                 //重新定义三角形的顶点
-                0,0,
-                -0.5f,-0.5f,
-                0.5f,-0.5f,
-                0.5f,0.5f,
-                -0.5f,0.5f,
-                -0.5f,-0.5f,
+                0f,0f,1f,1f,1f,
+                -0.5f,-0.5f,0.7f,0.7f,0.7f,
+                0.5f,-0.5f,0.7f,0.7f,0.7f,
+                0.5f,0.5f,0.7f,0.7f,0.7f,
+                -0.5f,0.5f,0.7f,0.7f,0.7f,
+                -0.5f,-0.5f,0.7f,0.7f,0.7f,
 
 
                 //线1
-                -0.5f,0f,
-                0.5f,0f,
+                -0.5f,0f,1f,0f,0f,
+                0.5f,0f,1f,0f,0f,
 
                 //木槌
-                0f,-0.25f,
-                0f,0.25f,
+                0f,-0.25f,0f,0f,1f,
+                0f,0.25f,1f,0f,0f
         };
         //openGL中坐标定义
 //  (-1,1) ———————————————————————————————(1,1)
@@ -123,8 +125,8 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         GlUtil.checkGlError("glUseProgram");
 
         //获取uniform的位置, 并把这个位置存入uColorLocation
-        uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR);
-        GlUtil.checkGlError("glGetUniformLocation");
+        aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR);
+        GlUtil.checkGlError("glGetAttribLocation");
 
         //获取属性的位置,有了这个位置，就能告诉OpenGL去哪里找到这个属性对应的数据
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
@@ -133,13 +135,18 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         //2.读取顶点数据
         vertexData.position(0);//确保从缓冲区的开头读取数据。每个缓冲区都有一个内部指针可以通过调用position()来移动它
         //告诉openGL可以在缓冲区vertexData找到属性a_Position对应的数据。
-        //参数：1.属性位置；2.表示vertexData中几个分量表示一个点；3.表数据类型；6.表数据源
-        GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, 0, vertexData);
+        //参数：1.属性位置；2.表示vertexData中几个分量表示一个点；3.表数据类型；5.告诉opengl每个位置之间有多少个字节；6.表数据源
+        GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, STRIDE, vertexData);
         GlUtil.checkGlError("glVertexAttribPointer");
         //使能顶点数组
         GLES20.glEnableVertexAttribArray(aPositionLocation);
         GlUtil.checkGlError("glEnableVertexAttribArray");
 
+        vertexData.position(POSITION_COMPONENT_COUNT);
+        GLES20.glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GLES20.GL_FLOAT, false, STRIDE, vertexData);
+        GlUtil.checkGlError("glVertexAttribPointer");
+        GLES20.glEnableVertexAttribArray(aColorLocation);
+        GlUtil.checkGlError("glEnableVertexAttribArray");
     }
 
     /**
@@ -169,23 +176,23 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 
         //3.5在屏幕上绘制
         //更新着色器代码中的u_Color的值。与属性不同，uniform的分量没有默认值
-        GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+//        GLES20.glUniform4f(aColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
         GlUtil.checkGlError("glUniform4f");
         //开始绘制三角形，从第0个点取6个点，共画两个三角形
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
         GlUtil.checkGlError("glDrawArrays");
 
-        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+//        GLES20.glUniform4f(aColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         GlUtil.checkGlError("glUniform4f");
         //开始绘制一条执行，从第0个点取2个点
         GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
         GlUtil.checkGlError("glDrawArrays");
 
-        GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
+//        GLES20.glUniform4f(aColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         //开始绘制两个点，从第8个点开始取1个点
         GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1);
 
-        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+//        GLES20.glUniform4f(aColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         //开始绘制两个点，从第9个点开始取1个点
         GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1);
 
