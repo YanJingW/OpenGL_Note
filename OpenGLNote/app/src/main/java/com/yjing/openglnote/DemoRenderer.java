@@ -3,6 +3,7 @@ package com.yjing.openglnote;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -24,15 +25,18 @@ class DemoRenderer implements GLSurfaceView.Renderer {
     public static final String A_COLOR = "a_Color";
     //和simple_vertex_shader.glsl中的attribute vec4 a_Position;是对应的
     public static final String A_POSITION = "a_Position";
+    public static final String U_MATRIX = "u_Matrix";
     private static final int POSITION_COMPONENT_COUNT = 2;
     private static final int COLOR_COMPONENT_COUNT = 3;
     public static final int STRIDE = (POSITION_COMPONENT_COUNT+COLOR_COMPONENT_COUNT)*BYTES_PER_FLOAT;
 
     private int aColorLocation;
     private int aPositionLocation;
+    private int uMatrixLocation;
 
     private final FloatBuffer vertexData;
     private final Context context;
+    private float[] projectionMatrix = new float[16];
 
     public DemoRenderer(Context context) {
         super();
@@ -54,11 +58,11 @@ class DemoRenderer implements GLSurfaceView.Renderer {
 //                0.5f,0.5f,
                 //重新定义三角形的顶点
                 0f,0f,1f,1f,1f,
-                -0.5f,-0.5f,0.7f,0.7f,0.7f,
-                0.5f,-0.5f,0.7f,0.7f,0.7f,
-                0.5f,0.5f,0.7f,0.7f,0.7f,
-                -0.5f,0.5f,0.7f,0.7f,0.7f,
-                -0.5f,-0.5f,0.7f,0.7f,0.7f,
+                -0.5f,-0.8f,0.7f,0.7f,0.7f,
+                0.5f,-0.8f,0.7f,0.7f,0.7f,
+                0.5f,0.8f,0.7f,0.7f,0.7f,
+                -0.5f,0.8f,0.7f,0.7f,0.7f,
+                -0.5f,-0.8f,0.7f,0.7f,0.7f,
 
 
                 //线1
@@ -132,6 +136,9 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
         GlUtil.checkGlError("glGetAttribLocation");
 
+        uMatrixLocation = GLES20.glGetUniformLocation(program, U_MATRIX);
+        GlUtil.checkGlError("uMatrixLocation");
+
         //2.读取顶点数据
         vertexData.position(0);//确保从缓冲区的开头读取数据。每个缓冲区都有一个内部指针可以通过调用position()来移动它
         //告诉openGL可以在缓冲区vertexData找到属性a_Position对应的数据。
@@ -160,6 +167,16 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         //设置视口大小，告诉OpenGL可以用来渲染的surface的大小
         GLES20.glViewport(0,0,width,height);
 
+        //得到一个正交投影矩阵
+        float ratio;
+        if (width>height) {
+            ratio =(float)width / (float)height;
+            Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, -1, 1);
+        }else {
+            ratio = (float)height/(float)width;
+            Matrix.orthoM(projectionMatrix, 0, -1, 1, -ratio, ratio, -1, 1);
+        }
+
     }
 
     /**
@@ -173,6 +190,14 @@ class DemoRenderer implements GLSurfaceView.Renderer {
         //清空屏幕，擦除屏幕上的所有颜色，并用之前glClearColor()调用定义的颜色充满整个屏幕
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GlUtil.checkGlError("glClear");
+
+//        int location,
+//        int count,
+//        boolean transpose,
+//        float[] value,
+//        int offset
+        //给着色器传递正交投影矩阵
+        GLES20.glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0);
 
         //3.5在屏幕上绘制
         //更新着色器代码中的u_Color的值。与属性不同，uniform的分量没有默认值
