@@ -1,2 +1,3 @@
-# OpenGL_Note
-Android平台下的OpenGL学习笔记
+﻿# OpenGL_Note
+Android平台下的OpenGL学习笔记。。。
+
